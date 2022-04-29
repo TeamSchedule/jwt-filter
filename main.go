@@ -10,10 +10,11 @@ import (
 )
 
 var JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
-var JwtValidPort = os.Getenv("JWT_VALID_PORT")
+var JwtFilterPort = os.Getenv("JWT_FILTER_PORT")
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
 	AuthorizationHeader := r.Header.Get("Authorization")
+	fmt.Println(AuthorizationHeader)
 	if !strings.HasPrefix(AuthorizationHeader, "Bearer ") {
 		return
 	}
@@ -41,16 +42,21 @@ func sayHello(w http.ResponseWriter, r *http.Request) {
 		msg = "Couldn't handle this token:"
 	}
 
+	fmt.Println(statusCode)
 	w.WriteHeader(statusCode)
 	fmt.Fprintf(w, msg)
 }
 
 func main() {
+	fmt.Println("JWT FILTER - START SERVER")
+	fmt.Println("JWT_SECRET_KEY = " + JwtSecretKey)
+	fmt.Println("JWT_FILTER_PORT = " + JwtFilterPort)
+
 	// Устанавливаем роутер
 	http.HandleFunc("/", sayHello)
 
 	// устанавливаем порт веб-сервера
-	err := http.ListenAndServe(":"+JwtValidPort, nil)
+	err := http.ListenAndServe(":"+JwtFilterPort, nil)
 
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

@@ -1,16 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 )
-
-var JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
-var JwtFilterPort = os.Getenv("JWT_FILTER_PORT")
 
 func validateAuthorizationToken(w http.ResponseWriter, r *http.Request) {
 	AuthorizationHeader := r.Header.Get("Authorization")
@@ -42,18 +37,15 @@ func validateAuthorizationToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(statusCode)
-	fmt.Fprintf(w, msg)
+	_, err = w.Write([]byte(msg))
+
+	if err != nil {
+		log.Fatal("Write response error", err)
+	}
 }
 
 func main() {
-	if JwtSecretKey == "" {
-		log.Fatal("environment variable `JWT_SECRET_KEY` must be specified and must be non empty value")
-	}
-
-	if JwtFilterPort == "" {
-		log.Fatal("environment variable `JWT_FILTER_PORT` must be specified and must be non empty value")
-	}
-
+	InitArgs()
 	log.Println("JWT-FILTER SERVER START SUCCESSFULLY")
 
 	// Устанавливаем роутер

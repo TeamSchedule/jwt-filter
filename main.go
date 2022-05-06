@@ -12,9 +12,8 @@ import (
 var JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
 var JwtFilterPort = os.Getenv("JWT_FILTER_PORT")
 
-func sayHello(w http.ResponseWriter, r *http.Request) {
+func validateAuthorizationToken(w http.ResponseWriter, r *http.Request) {
 	AuthorizationHeader := r.Header.Get("Authorization")
-	fmt.Println(AuthorizationHeader)
 	if !strings.HasPrefix(AuthorizationHeader, "Bearer ") {
 		return
 	}
@@ -42,18 +41,23 @@ func sayHello(w http.ResponseWriter, r *http.Request) {
 		msg = "Couldn't handle this token:"
 	}
 
-	fmt.Println(statusCode)
 	w.WriteHeader(statusCode)
 	fmt.Fprintf(w, msg)
 }
 
 func main() {
-	fmt.Println("JWT FILTER - START SERVER")
-	fmt.Println("JWT_SECRET_KEY = " + JwtSecretKey)
-	fmt.Println("JWT_FILTER_PORT = " + JwtFilterPort)
+	if JwtSecretKey == "" {
+		log.Fatal("environment variable `JWT_SECRET_KEY` must be specified and must be non empty value")
+	}
+
+	if JwtFilterPort == "" {
+		log.Fatal("environment variable `JWT_FILTER_PORT` must be specified and must be non empty value")
+	}
+
+	log.Println("JWT-FILTER SERVER START SUCCESSFULLY")
 
 	// Устанавливаем роутер
-	http.HandleFunc("/", sayHello)
+	http.HandleFunc("/", validateAuthorizationToken)
 
 	// устанавливаем порт веб-сервера
 	err := http.ListenAndServe(":"+JwtFilterPort, nil)

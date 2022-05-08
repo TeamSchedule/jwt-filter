@@ -8,18 +8,24 @@ import (
 )
 
 func validateAuthorizationToken(w http.ResponseWriter, r *http.Request) {
-	AuthorizationHeader := r.Header.Get("Authorization")
-	if !strings.HasPrefix(AuthorizationHeader, "Bearer ") {
+	var statusCode = http.StatusUnauthorized
+	var msg = ""
+
+	// Authorization token format: "Bearer `token`"
+	authorizationToken := r.Header.Get("Authorization")
+	tokenParts := strings.Split(authorizationToken, " ")
+
+	if len(tokenParts) < 2 {
+		w.WriteHeader(statusCode)
 		return
 	}
 
-	tokenString := strings.Split(AuthorizationHeader, " ")[1]
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// Get `token` part from "Bearer `token`"
+	tokenValue := tokenParts[1]
+
+	token, err := jwt.Parse(tokenValue, func(token *jwt.Token) (interface{}, error) {
 		return []byte(JwtSecretKey), nil
 	})
-
-	var statusCode = http.StatusUnauthorized
-	var msg = ""
 
 	if token.Valid {
 		statusCode = http.StatusOK

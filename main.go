@@ -13,8 +13,12 @@ var JwtSecretKey = os.Getenv("JWT_SECRET_KEY")
 var JwtFilterPort = os.Getenv("JWT_FILTER_PORT")
 
 func validateAuthorizationToken(w http.ResponseWriter, r *http.Request) {
+	var statusCode = http.StatusUnauthorized
+	var msg = ""
+
 	AuthorizationHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(AuthorizationHeader, "Bearer ") {
+		w.WriteHeader(statusCode)
 		return
 	}
 
@@ -22,9 +26,6 @@ func validateAuthorizationToken(w http.ResponseWriter, r *http.Request) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(JwtSecretKey), nil
 	})
-
-	var statusCode = http.StatusUnauthorized
-	var msg = ""
 
 	if token.Valid {
 		statusCode = http.StatusOK

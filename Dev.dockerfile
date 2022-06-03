@@ -2,6 +2,7 @@ ARG GO_VERSION=1.18.1
 FROM golang:${GO_VERSION}-alpine as jwt-filter-deps
 WORKDIR /jwt-filter
 COPY . .
+RUN go mod tidy
 RUN go build -buildvcs=false -o jwt-filter .
 
 

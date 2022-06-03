@@ -11,3 +11,4 @@
 !*.go
 
 !/server/
+!/server/**/

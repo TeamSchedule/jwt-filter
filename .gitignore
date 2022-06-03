@@ -9,3 +9,5 @@
 # Src files:
 !*.mod
 !*.go
+
+!/server/
